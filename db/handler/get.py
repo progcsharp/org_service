@@ -4,9 +4,7 @@ from sqlalchemy import select, and_
 from sqlalchemy.orm import joinedload, aliased
 from db.models import Activity, Building, org_activity, Organization, OrganizationPhone
 
-# --------------------------
-# Helper: сериализация ORM
-# --------------------------
+
 def serialize_organization(org: Organization):
     return {
         "id": org.id,
@@ -21,9 +19,7 @@ def serialize_organization(org: Organization):
         "activities": [a.name for a in org.activities],
     }
 
-# --------------------------
-# Простые хэндлеры
-# --------------------------
+
 async def get_organizations_handler(session: AsyncSession):
     result = await session.execute(
         select(Organization)
@@ -76,9 +72,7 @@ async def get_organizations_by_building_id_handler(building_id: int, session: As
     return [serialize_organization(org) for org in result.scalars().all()]
 
 
-# --------------------------
-# Поиск организаций по деятельности (рекурсивное дерево)
-# --------------------------
+
 async def get_organizations_by_activity_id_handler(activity_id: int, session: AsyncSession):
     result = await session.execute(
         select(Activity).where(Activity.id == activity_id, Activity.parent_id == None)
@@ -141,9 +135,7 @@ async def get_organizations_by_activity_tree_handler(activity_name: str, session
     return [serialize_organization(org) for org in organizations]
 
 
-# --------------------------
-# Поиск организаций на площади или в радиусе
-# --------------------------
+
 async def get_organizations_nearby_handler(
     lat: float,
     lon: float,
@@ -221,9 +213,7 @@ async def get_organizations_nearby_handler(
         return [serialize_organization(org) for org in organizations]
 
 
-# --------------------------
-# Остальные сущности
-# --------------------------
+
 async def get_phones_by_organization_handler(organization_id: int, session: AsyncSession):
     result = await session.execute(
         select(OrganizationPhone).where(OrganizationPhone.organization_id == organization_id)
